@@ -1,6 +1,9 @@
 import os
 import copy
 
+printOut = False
+printIter = False
+
 #part2
 lines = []
 def checkAdjacent(row, col):
@@ -8,18 +11,93 @@ def checkAdjacent(row, col):
         return 0
     count = 0
     #print("************")
-    for r in range(row - 1, row + 2):
-        for c in range (col - 1, col + 2):
-            try :
-                #print(r,c,row,col,str(len(lines)),str(len(lines[r])),lines[r][c],end="")
-                if not(r == row and c == col) and (r > -1 and r < len(lines)) and (c > -1 and c < len(lines[r])) and lines[r][c] == "#":
-                    count = count + 1
-                    #print("!!!")
-                #else:
-                    #print("")
-            except:
-                pass
-    #print(count)
+
+    #check left
+    checkR = row
+    checkC = col - 1
+    while checkC > 0 and lines[checkR][checkC] == ".":
+        checkC = checkC - 1
+    if checkC >= 0 and lines[checkR][checkC] == "#":
+        if printOut:
+            print(row, col, checkR, checkC, "left")
+        count = count + 1
+
+    #check right
+    checkR = row
+    checkC = col + 1
+    while checkC < len(lines[checkR]) and lines[checkR][checkC] == ".":
+        checkC = checkC + 1
+    if checkC < len(lines[checkR]) and lines[checkR][checkC] == "#":
+        if printOut:
+            print(row, col, checkR, checkC, "right")
+        count = count + 1
+
+    #check up
+    checkR = row - 1
+    checkC = col
+    while checkR > 0 and lines[checkR][checkC] == ".":
+        checkR = checkR - 1
+    if checkR >= 0 and lines[checkR][checkC] == "#":
+        if printOut:
+            print(row, col, checkR, checkC, "up")
+        count = count + 1
+
+    #check down
+    checkR = row + 1
+    checkC = col
+    while checkR < len(lines) and lines[checkR][checkC] == ".":
+        checkR = checkR + 1
+    if checkR < len(lines) and lines[checkR][checkC] == "#":
+        if printOut:
+            print(row, col, checkR, checkC, "down")
+        count = count + 1
+
+    #check left-up
+    checkR = row - 1
+    checkC = col - 1
+    while checkC > 0 and checkR > 0 and lines[checkR][checkC] == ".":
+        checkC = checkC - 1
+        checkR = checkR - 1
+    if checkC >= 0 and checkR >= 0 and lines[checkR][checkC] == "#":
+        if printOut:
+            print(row, col, checkR, checkC, "left-up")
+        count = count + 1
+
+    #check right-up
+    checkR = row - 1
+    checkC = col + 1
+    while checkC < len(lines[checkR]) and checkR > 0 and lines[checkR][checkC] == ".":
+        checkC = checkC + 1
+        checkR = checkR - 1
+    if checkC < len(lines[checkR]) and checkR >= 0 and lines[checkR][checkC] == "#":
+        if printOut:
+            print(row, col, checkR, checkC, "right-up")
+        count = count + 1
+
+    #check left-down
+    checkR = row + 1
+    checkC = col - 1
+    while checkC > 0 and checkR < len(lines) and lines[checkR][checkC] == ".":
+        checkC = checkC - 1
+        checkR = checkR + 1
+    if checkC >= 0 and checkR < len(lines) and lines[checkR][checkC] == "#":
+        if printOut:
+            print(row, col, checkR, checkC, "left-down")
+        count = count + 1
+
+    #check right-down
+    checkR = row + 1
+    checkC = col + 1   
+    while checkR < len(lines) and checkC < len(lines[checkR]) and lines[checkR][checkC] == ".":
+        checkC = checkC + 1
+        checkR = checkR + 1
+    #print(row, col, checkR, checkC, len(lines),len(lines[checkR]))
+    if checkR < len(lines) and checkC < len(lines[checkR]) and lines[checkR][checkC] == "#":
+        if printOut:
+            print(row, col, checkR, checkC, "right-down")
+        count = count + 1
+    if printOut:
+        print(row, col, "Count", count)
     return count
 
 def printSeats():
@@ -35,13 +113,14 @@ with open("11.txt") as file:
 
     iteration = 0
     changed = True
-    #print("---------",iteration)
-    #printSeats()
+    if printIter:
+        print("---------",iteration)
+        printSeats()
     while changed == True:
         workingSeats = copy.deepcopy(lines)
         changed = False
         iteration = iteration + 1
-        
+
         for r in range(len(lines)):
             colLen = len(lines[r])
             for c in range(colLen):
@@ -51,16 +130,17 @@ with open("11.txt") as file:
                     myLine = myLine[:c] + "#" + myLine[c + 1:]
                     workingSeats[r] = myLine
                     changed = True
-                if count > 3 and myLine[c] == "#":
+                if count > 4 and myLine[c] == "#":
                     myLine = myLine[:c] + "L" + myLine[c + 1:]
                     workingSeats[r] = myLine
                     changed = True
                 c = c + 1
             r = r + 1
         lines = copy.deepcopy(workingSeats)
-        #print("---------",iteration)
-        #printSeats()
-        #print(str(changed))
+        if printIter:
+            print("---------",iteration)
+            printSeats()
+            print(str(changed))
     occupiedCount = 0
     for line in lines:
         occupiedCount = occupiedCount + line.count("#")
