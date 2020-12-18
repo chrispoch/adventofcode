@@ -3,15 +3,14 @@ import itertools
 import datetime
 
 fileName = "10.txt"
-max = -1
 
-def validateList(adapters):
+def validateList(adapters, min, max):
     valid = True
     if adapters == None:
         return False
     if len(adapters) < 2:
         return False
-    if adapters[0] != 0:
+    if adapters[0] != min:
         return False
     if adapters[-1] != max:
         return False
@@ -53,19 +52,48 @@ with open(fileName) as file:
         i = i + 1
     print(diff1, diff3, diff1 * diff3)
     #part 2
-    max = numbers[-1]
-    validOptions = {}
-    
-    L = 0
-    for L in range(len(numbers)):
-        item = itertools.combinations(numbers, L + 1)
-        for combo in item:
-            comboList = list(combo)
-            #comboList.sort()
-            #print(comboList)
-            if validateList(comboList):
-                validOptions[makeId(comboList)] = True
-                #print("Match")
-        L = L + 1
-    print(len(validOptions))
+    unskippable = []
+    unskippable.append(0)
+
+    for i in range(len(numbers)):
+        if i > 0 and (numbers[i] - numbers[i - 1]) == 3:
+            unskippable.append(i)
+        else:
+            if (i + 1) < len(numbers):
+                big = numbers[i + 1]
+                little = numbers[i]
+                if (big - little) == 3:
+                    unskippable.append(i)
+
+    problems = []
+    for i in range(1, len(unskippable)):
+        pair = [unskippable[i - 1], unskippable[i]]
+        problems.append(pair)
+    solutions = []
+    for i in range(len(problems)):
+        solutions.append(0)
+
+    #work each problem and save its solution
+    for i in range(len(problems)):
+        mini = problems[i][0]
+        maxi = problems[i][1]
+        if maxi - mini == 1:
+            solutions[i] = 1
+        else:
+            validOptions = {}
+            workSet = numbers[mini:maxi + 1]
+
+            L = 0
+            for L in range(len(workSet)):
+                item = itertools.combinations(workSet, L + 1)
+                for combo in item:
+                    comboList = list(combo)
+                    if validateList(comboList, workSet[0], workSet[-1]):
+                        validOptions[makeId(comboList)] = True
+                L = L + 1
+            solutions[i] = len(validOptions)
+    total = 1
+    for item in solutions:
+        total *= item
+    print(total)
 print(datetime.datetime.now())
