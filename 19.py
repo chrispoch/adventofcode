@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 
 debug = True
 
@@ -31,13 +32,13 @@ def rules(lines):
             rules[num] = [terms[0]]
         else:
             if len(terms) == 2:
-                rules[num] = [terms[0],terms[1],"&"]
+                rules[num] = ["(",terms[0],terms[1],")"]
             else:
                 if len(terms) == 3:
-                    rules[num] = [terms[0],terms[2],"|"]
+                    rules[num] = ["(",terms[0],"|",terms[2],")"]
                 else:
                     if len(terms) == 5:
-                        rules[num] = [terms[0],terms[1],"&",terms[3],terms[4],"&","|"]
+                        rules[num] = ["(",terms[0],terms[1],"|",terms[3],terms[4],")"]
                     else:
                         print("Error len(terms)=",len(terms))
     return rules
@@ -53,11 +54,17 @@ def checkAllChars(list):
 with open(fileName) as file:
     lines = file.readlines()
     ruleLines = []
+    messages = []
+    isRule = True
     for line in lines:
         if len(line) > 1:
-            ruleLines.append(line)
+            if isRule:
+                ruleLines.append(line)
+            else:
+                messages.append(line)
         else:
-            break
+            isRule = False
+            
 
     rules = rules(ruleLines)
     
@@ -70,4 +77,23 @@ with open(fileName) as file:
                 rule0 = rule0[0:i] + rules[rule0[i]] + rule0[i+1:]
         allChars = checkAllChars(rule0)
 
-    print(rule0)
+    #make regex string
+    strRule0 = "^"
+    for item in rule0:
+        strRule0 += str(item)
+    strRule0 += "$"
+    if debug:
+        print(strRule0)
+    part1Pattern = re.compile(strRule0)
+
+    #check remaining strings
+    matches = 0
+    for msg in messages:
+        if part1Pattern.match(msg) != None:
+            matches += 1
+    print(matches)
+
+    #implement part 2 changes
+    rules[8] = ["(",42,"|",42,8,")"]
+    rules[11] = ["(",42,31,"|",42,11,31,")"]
+    
