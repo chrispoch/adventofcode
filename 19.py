@@ -87,13 +87,58 @@ with open(fileName) as file:
     part1Pattern = re.compile(strRule0)
 
     #check remaining strings
+    matchLength = 0
     matches = 0
+    possiblePart2 = []
     for msg in messages:
         if part1Pattern.match(msg) != None:
             matches += 1
+            matchLength = len(msg)
+        else:
+            if len(msg) > matchLength:
+                possiblePart2.append(msg)
+
     print(matches)
 
     #implement part 2 changes
-    rules[8] = ["(",42,"|",42,8,")"]
-    rules[11] = ["(",42,31,"|",42,11,31,")"]
-    
+    #rules[8] = ["(",42,"|",42,8,")"] # was 42; now produces 42 42 42 42...
+    #rules[11] = ["(",42,31,"|",42,11,31,")"] # was 42 31; now produces 42 ... 31 ... 
+    #rule 0 is 8 11 so produces 42 n * 31 m, n > m
+
+    #need to find 42 and 31
+    rule42 = rules[42]
+    allChars = False
+    while not allChars:
+        for i in range(len(rule42)):
+            if isinstance(rule42[i], int):
+                rule42 = rule42[0:i] + rules[rule42[i]] + rule42[i+1:]
+        allChars = checkAllChars(rule42)
+    strRule42 = ""
+    for item in rule42:
+        strRule42 += str(item)
+
+    rule31 = rules[31]
+    allChars = False
+    while not allChars:
+        for i in range(len(rule31)):
+            if isinstance(rule31[i], int):
+                rule31 = rule31[0:i] + rules[rule31[i]] + rule31[i+1:]
+        allChars = checkAllChars(rule31)
+    strRule31 = ""
+    for item in rule31:
+        strRule31 += str(item)
+
+    #check possible part 2
+    strRule8 = strRule42 + '+'
+    strRule11 = r'(' + '|'.join([f'{strRule42}{{{n}}}{strRule31}{{{n}}}' for n in range(1,5)]) + ')'
+    strRule0 = '^' + strRule8 + strRule11 + '$'
+
+    part2Pattern = re.compile(strRule0)
+
+    #check remaining strings
+    matches = 0
+    for msg in messages:
+        if part2Pattern.match(msg) != None:
+            matches += 1
+
+    print(matches)
